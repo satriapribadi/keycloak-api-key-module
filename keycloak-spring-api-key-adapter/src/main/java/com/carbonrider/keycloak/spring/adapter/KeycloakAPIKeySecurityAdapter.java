@@ -38,7 +38,7 @@ public class KeycloakAPIKeySecurityAdapter extends KeycloakWebSecurityConfigurer
     @Override
     protected KeycloakAuthenticationProcessingFilter keycloakAuthenticationProcessingFilter() throws Exception {
         KeycloakAPIKeyProcessingFilter filter = new KeycloakAPIKeyProcessingFilter(authenticationManagerBean());
-        filter.setSessionAuthenticationStrategy(sessionAuthenticationStrategy());
+        filter.setSessionAuthenticationStrategy(this.sessionAuthenticationStrategy());
         return filter;
     }
 

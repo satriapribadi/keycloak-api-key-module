@@ -17,10 +17,7 @@ package com.carbonrider.keycloak.provider;
  * limitations under the License.
  */
 
-import com.carbonrider.keycloak.domain.APIKeyDomain;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.AuthenticationFlowError;
-import org.keycloak.authentication.AuthenticationFlowException;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.models.KeycloakSession;
@@ -28,12 +25,17 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * @author Yogesh Jadhav
  */
 
 public class APIKeyAuthenticator extends AbstractUsernameFormAuthenticator implements Authenticator {
+
+    public static final String API_KEY_ATTRIBUTE = "api-key";
+
+    public static final String API_KEY_HEADER_ATTRIBUTE = "x-api-key";
 
     private final KeycloakSession session;
 
@@ -43,16 +45,26 @@ public class APIKeyAuthenticator extends AbstractUsernameFormAuthenticator imple
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        List<String> apiKeyCollection = context.getHttpRequest().getHttpHeaders().getRequestHeader(APIKeyDomain.API_KEY_HEADER_ATTRIBUTE);
+        List<String> apiKeyCollection = context.getHttpRequest().getHttpHeaders().getRequestHeader(API_KEY_HEADER_ATTRIBUTE);
         if (apiKeyCollection == null || apiKeyCollection.isEmpty()) {
             return;
         }
 
         String apiKey = apiKeyCollection.get(0);
 
-        APIKeyDomain apiKeyDomain = new APIKeyDomain(this.session);
+        RealmModel realm = this.session.getContext().getRealm();
 
-        UserModel user = apiKeyDomain.findUserFromKey(apiKey).orElseThrow(() -> new AuthenticationFlowException("Invalid api key", AuthenticationFlowError.INVALID_CREDENTIALS));
+        List<UserModel> result =
+                session
+                        .users()
+                        .searchForUserByUserAttributeStream(session.realms().getRealm(realm.getName()), "api-key", apiKey)
+                        .collect(Collectors.toList());
+
+        if(result.isEmpty()) {
+            return;
+        }
+
+        UserModel user = result.get(0);
 
         if (!enabledUser(context, user)) {
             context.cancelLogin();

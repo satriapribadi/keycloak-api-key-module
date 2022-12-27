@@ -195,10 +195,11 @@ public class KeycloakAPIKeyProcessingFilter extends KeycloakAuthenticationProces
         params.add(new BasicNameValuePair("grant_type", "password"));
         params.add(new BasicNameValuePair("client_id", deployment.getResourceName()));
 
-        //For validation add dummy fields.
-        params.add(new BasicNameValuePair("username", "dummy"));
-        params.add(new BasicNameValuePair("password", "dummy"));
+//        For validation add dummy fields.
+//        params.add(new BasicNameValuePair("username", "dummy"));
+//        params.add(new BasicNameValuePair("password", "dummy"));
         post.setEntity(new UrlEncodedFormEntity(params));
+
 
         post.addHeader(API_KEY_HEADER, apiKey);
 
@@ -207,13 +208,13 @@ public class KeycloakAPIKeyProcessingFilter extends KeycloakAuthenticationProces
         int status = response.getStatusLine().getStatusCode();
         HttpEntity entity = response.getEntity();
 
-        if (status != 200) {
-            throw new BadCredentialsException("API Key is invalid");
-        }
+//        if (status != 200) {
+//            throw new BadCredentialsException("API Key is invalid");
+//        }
 
-        if (entity == null) {
-            throw new AuthenticationServiceException("Didn't receive expected response from Keycloak API validation.");
-        }
+//        if (entity == null) {
+//            throw new AuthenticationServiceException("Didn't receive expected response from Keycloak API validation.");
+//        }
 
         InputStream is = entity.getContent();
 
