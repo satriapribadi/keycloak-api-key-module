@@ -33,9 +33,8 @@ import java.util.stream.Collectors;
 
 public class APIKeyAuthenticator extends AbstractUsernameFormAuthenticator implements Authenticator {
 
-    public static final String API_KEY_ATTRIBUTE = "api-key";
-
     public static final String API_KEY_HEADER_ATTRIBUTE = "x-api-key";
+    public static final String CLIENT_ID_HEADER_ATTRIBUTE = "x-client-id";
 
     private final KeycloakSession session;
 
@@ -50,14 +49,20 @@ public class APIKeyAuthenticator extends AbstractUsernameFormAuthenticator imple
             return;
         }
 
+        List<String> clientIdCollection = context.getHttpRequest().getHttpHeaders().getRequestHeader(CLIENT_ID_HEADER_ATTRIBUTE);
+        if (clientIdCollection == null || clientIdCollection.isEmpty()) {
+            return;
+        }
+
         String apiKey = apiKeyCollection.get(0);
+        String clientId = clientIdCollection.get(0);
 
         RealmModel realm = this.session.getContext().getRealm();
 
         List<UserModel> result =
                 session
                         .users()
-                        .searchForUserByUserAttributeStream(session.realms().getRealm(realm.getName()), "api-key", apiKey)
+                        .searchForUserByUserAttributeStream(session.realms().getRealm(realm.getName()), clientId, apiKey)
                         .collect(Collectors.toList());
 
         if(result.isEmpty()) {
