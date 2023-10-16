@@ -10,8 +10,8 @@
     <description>Parent module for Keycloak API.</description>
 
     <properties>
-        <java.version>11</java.version>
-        <keycloak.version>18.0.2</keycloak.version>
+        <java.version>17</java.version>
+        <keycloak.version>22.0.3</keycloak.version>
         <spring.boot.version>2.4.10</spring.boot.version>
     </properties>
 	
